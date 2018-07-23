@@ -110,11 +110,74 @@ class Adapter
         }
 
         /*
+         * Apply filters:
+         */
+        $this->applyFilters();
+
+        /*
          * Grouping:
          */
         foreach($this->units as $unit_id => $unit) {
             $floorplan_id = $unit['floorplan_id'];
             $this->units_grouped[$floorplan_id][$unit_id] = $unit;
+        }
+    }
+
+    private function applyFilters()
+    {
+        /*
+         * Available/Unoccupied units:
+         */
+        foreach ($this->units as $id => $unit) {
+            if (!in_array($unit['availability_status'], [
+                'Vacant Unrented Ready',
+                'Vacant Unrented Not Ready'])) {
+                unset($this->units[$id]);
+            }
+        }
+
+        /*
+         * 120 days constraint:
+         */
+        $date_constraint = time() + 10368000;
+        foreach ($this->units as $id => $unit) {
+            if (strtotime($unit['date_available']) > $date_constraint) {
+                unset($this->units[$id]);
+            }
+        }
+
+        /*
+         * 10 Units Per Floor Plan ID:
+         */
+        $unit_groups = [];
+
+        foreach ($this->units as $unit) {
+            $floorplan_id = $unit['floorplan_id'];
+            $unit_groups[$floorplan_id][] = $unit;
+        }
+
+        foreach ($unit_groups as $group) {
+
+            if (count($group) <= 10) {
+                continue;
+            }
+
+            /*
+             * Sorting:
+             */
+            uasort($group, function($a, $b) {
+                if ((float)$a['price'] == (float)$b['price']) {
+                    return 0;
+                }
+                return ((float)$a['price'] < (float)$b['price']) ? -1 : 1;
+            });
+
+            $removed_units = array_splice($group, 10);
+
+            foreach($removed_units as $removed_unit) {
+                $unit_ext_id = $removed_unit['unit_ext_id'];
+                unset($this->units[$unit_ext_id]);
+            }
         }
     }
 }
