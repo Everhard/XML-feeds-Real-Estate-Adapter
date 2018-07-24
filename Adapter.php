@@ -115,6 +115,11 @@ class Adapter
         $this->applyFilters();
 
         /*
+         * Minimizing units data:
+         */
+        $this->minimizeUnitsData();
+
+        /*
          * Grouping:
          */
         foreach($this->units as $unit_id => $unit) {
@@ -198,6 +203,14 @@ class Adapter
                 $unit_ext_id = $removed_unit['unit_ext_id'];
                 unset($this->units[$unit_ext_id]);
             }
+        }
+    }
+
+    private function minimizeUnitsData()
+    {
+        foreach ($this->units as $id => $unit) {
+            unset($this->units[$id]['availability_status']);
+            unset($this->units[$id]['date_available']);
         }
     }
 }
