@@ -123,6 +123,26 @@ class Adapter
         }
     }
 
+    public function getFloorplans()
+    {
+        $floorplans = [];
+
+        foreach ($this->units_grouped as $floorplan_id => $units) {
+            $floorplans[$floorplan_id] = $this->floorplans[$floorplan_id];
+
+            $available_floors = [];
+            foreach ($units as $unit) {
+                if (!in_array($unit['floor_number'], $available_floors)) {
+                    $available_floors[] = $unit['floor_number'];
+                }
+            }
+
+            $floorplans[$floorplan_id]['floors'] = implode(',', $available_floors);
+        }
+
+        return $floorplans;
+    }
+
     private function applyFilters()
     {
         /*
