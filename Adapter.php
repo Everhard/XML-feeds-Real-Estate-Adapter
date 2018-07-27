@@ -148,6 +148,17 @@ class Adapter
         return $floorplans;
     }
 
+    public function getJsonUnits()
+    {
+        return json_encode($this->units_grouped);
+    }
+
+    public function getJsonSearchOptions()
+    {
+        $units = new SearchOptions($this->getFloorplans());
+        return $units->getJsonStructuredList();
+    }
+
     private function applyFilters()
     {
         /*
