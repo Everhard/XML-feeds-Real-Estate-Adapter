@@ -159,6 +159,29 @@ class Adapter
         return $units->getJsonStructuredList();
     }
 
+    public function getBedroomTypes()
+    {
+        $bedroom_types = [];
+
+        $units = new SearchOptions($this->getFloorplans());
+        foreach ($units->getStructredList() as $bedroom_type => $search_structure) {
+            $bedrooms_count[] = $bedroom_type;
+        }
+
+        sort($bedrooms_count);
+
+        foreach ($bedrooms_count as $bedroom_count) {
+            if ($bedroom_count === "*") {
+                $bedroom_types[$bedroom_count] = "All";
+            } else {
+                $bedroom_plural     = ($bedroom_count > 1) ? 's' : '';
+                $bedroom_types[$bedroom_count] = ($bedroom_count == 0) ? "Studio" : "$bedroom_count bedroom$bedroom_plural";
+            }
+        }
+
+        return $bedroom_types;
+    }
+
     private function applyFilters()
     {
         /*
